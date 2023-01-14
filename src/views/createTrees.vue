@@ -12,7 +12,7 @@ const ctx = computed(() => myCanvas.value!.getContext("2d")!)
 
 const HEIGHT = 600
 const WIDTH = 600
-
+const penddingTask: Function[] = []
 
 onMounted(() => {
     init()
@@ -89,14 +89,32 @@ function generateRightBranch(startPoint: Branch) {
 
 function step(startPoint: Branch) {
     if (Math.random() < 0.5) {
-        const left =  generateLeftBranch(startPoint)
-        step(left)
+        const left = generateLeftBranch(startPoint)
+        penddingTask.push(() => 
+            step(left)
+        )
+
     }
     if (Math.random() < 0.5) {
-        const right =  generateRightBranch(startPoint)
-        step(right)
+        const right = generateRightBranch(startPoint)
+        penddingTask.push(() => 
+            step(right)
+        )
     }
 }
+
+function frame() {
+    const task = [...penddingTask]
+    penddingTask.length = 0
+    task.forEach(fn => { fn() })
+}
+function startFrame(){
+    requestAnimationFrame(()=>{
+    frame()
+    startFrame()
+})
+}
+startFrame()
 
 </script>
 
